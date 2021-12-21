@@ -1,24 +1,34 @@
+//bibliotecas nativas
 import * as React from 'react';
-//bibliotecas
 import { View, StyleSheet, Button } from 'react-native';
+//biblioteca
 import { Audio } from 'expo-av';
+
+
+
 
 export default function App() {
   const [sound, setSound] = React.useState();
+  const [milis, setMilis] = React.useState(0);
 
+  const onPlaybackStatusUpdate = (status) => {    
+    setMilis(status.positionMillis);
+  }
+  
   //função para adicionar o audio, este esta sendo direcionado para o link
   async function playSound() {
     console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync(
-      "http://assets.gospelmais.com.br/biblia/jo/jo_4.mp3?_=1"
-      //  require('./assets/Hello.mp3')
-    );
+    const { sound } = await Audio.Sound.createAsync("http://assets.gospelmais.com.br/biblia/jo/jo_4.mp3?_=1");
+    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+    //adicionando o objeto a um var de estado 
     setSound(sound);
-
-    console.log('Playing Sound');
-    await sound.playAsync(); }
+    
+    //console.log('Playing Sound');
+    await sound.playFromPositionAsync(milis); 
+  }
 
   React.useEffect(() => {
+    console.log('milis:',milis);
     return sound
       ? () => {
           console.log('Unloading Sound');
@@ -26,8 +36,8 @@ export default function App() {
       : undefined;
   }, [sound]);
 
-
   const onPause = () =>{
+    console.log(sound.durationMillis)
     sound?sound.pauseAsync():undefined
   }
 //Função play e pause (precisa melhorar)
@@ -39,7 +49,8 @@ export default function App() {
       }
     </View>
   );
-}
+
+ }
 
 const styles = StyleSheet.create({
   container: {
@@ -49,3 +60,4 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
+
