@@ -1,11 +1,42 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+//bibliotecas
+import { View, StyleSheet, Button } from 'react-native';
+import { Audio } from 'expo-av';
 
 export default function App() {
+  const [sound, setSound] = React.useState();
+
+  //função para adicionar o audio, este esta sendo direcionado para o link
+  async function playSound() {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(
+      "http://assets.gospelmais.com.br/biblia/jo/jo_4.mp3?_=1"
+      //  require('./assets/Hello.mp3')
+    );
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync(); }
+
+  React.useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading Sound');
+          sound.unloadAsync(); }
+      : undefined;
+  }, [sound]);
+
+
+  const onPause = () =>{
+    sound?sound.pauseAsync():undefined
+  }
+//Função play e pause (precisa melhorar)
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Button title="Play Sound" onPress={playSound} />
+      {sound&&
+      <Button title="Pause Sound" onPress={onPause} />
+      }
     </View>
   );
 }
@@ -13,8 +44,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#132440', 
+    padding: 10,
   },
 });
